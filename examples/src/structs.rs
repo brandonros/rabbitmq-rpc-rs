@@ -24,7 +24,7 @@ pub struct SubtractResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InfoMessage {
-  pub value: String
+  pub value: String,
 }
 
 pub fn struct_to_bytes<T: serde::Serialize>(input: &T) -> Vec<u8> {

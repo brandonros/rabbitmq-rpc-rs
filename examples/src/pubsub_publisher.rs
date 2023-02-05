@@ -1,6 +1,6 @@
 mod structs;
 
-use std::{sync::Arc, collections::HashMap};
+use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Result;
 use futures::future::BoxFuture;
@@ -18,20 +18,13 @@ async fn main() -> Result<()> {
   let password = "guest";
   let exchange_name = String::from("amq.topic");
   let queue_name = String::from("q.pubsub");
-  let publisher = publisher::QueuePublisher::new(
-    host.to_string(),
-    port,
-    username.to_string(),
-    password.to_string(),
-    exchange_name,
-    queue_name,
-  );
+  let publisher = publisher::QueuePublisher::new(host.to_string(), port, username.to_string(), password.to_string(), exchange_name, queue_name);
   let (_connection, channel) = publisher.connect().await.unwrap();
   // start publishing messages
   loop {
     let message_type = "info";
     let message = InfoMessage {
-      value: String::from("Hello, world!")
+      value: String::from("Hello, world!"),
     };
     log::info!("publishing {:?}", message);
     let message_bytes = struct_to_bytes(&message);

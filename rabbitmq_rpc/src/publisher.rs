@@ -11,14 +11,7 @@ pub struct QueuePublisher {
 }
 
 impl QueuePublisher {
-  pub fn new(
-    host: String,
-    port: u16,
-    username: String,
-    password: String,
-    exchange_name: String,
-    queue_name: String,
-  ) -> QueuePublisher {
+  pub fn new(host: String, port: u16, username: String, password: String, exchange_name: String, queue_name: String) -> QueuePublisher {
     return QueuePublisher {
       host,
       port,
@@ -37,9 +30,7 @@ impl QueuePublisher {
     let channel = connection.open_channel(None).await?;
     channel.register_callback(amqprs::callbacks::DefaultChannelCallback).await?;
     // declare queues
-    let queue_declare_args = amqprs::channel::QueueDeclareArguments::default()
-      .queue(self.queue_name.clone())
-      .finish();
+    let queue_declare_args = amqprs::channel::QueueDeclareArguments::default().queue(self.queue_name.clone()).finish();
     channel.queue_declare(queue_declare_args).await?;
     // bind the queue to exchange
     let queue_bind_args = amqprs::channel::QueueBindArguments::default()

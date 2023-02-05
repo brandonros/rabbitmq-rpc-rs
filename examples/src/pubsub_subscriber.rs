@@ -1,6 +1,6 @@
 mod structs;
 
-use std::{sync::Arc, collections::HashMap};
+use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Result;
 use futures::future::BoxFuture;
@@ -26,10 +26,7 @@ async fn main() -> Result<()> {
   let queue_name = String::from("q.pubsub");
   let subscriber_consumer_tag = String::from("subscriber_consumer_tag");
   let mut message_handlers: HashMap<String, subscriber::OnMessageCallback> = HashMap::new();
-  message_handlers.insert(
-    String::from("info"),
-    Arc::new(move |a| Box::pin(on_info(a)) as BoxFuture<'static, Result<()>>),
-  );
+  message_handlers.insert(String::from("info"), Arc::new(move |a| Box::pin(on_info(a)) as BoxFuture<'static, Result<()>>));
   let subscriber = subscriber::QueueSubscriber::new(
     host.to_string(),
     port,
@@ -38,7 +35,7 @@ async fn main() -> Result<()> {
     exchange_name,
     queue_name,
     subscriber_consumer_tag,
-    message_handlers
+    message_handlers,
   );
   let (_connection, channel) = subscriber.connect().await.unwrap();
   // start consuming replies
