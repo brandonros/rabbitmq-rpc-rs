@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "rabbitmq_rpc",
+  "examples"
+]
