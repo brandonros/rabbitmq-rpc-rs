@@ -10,7 +10,7 @@ use structs::*;
 
 async fn on_add(deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
   let request: AddRequest = structs::bytes_to_struct(&request);
-  log::info!("on_add: request = {:?}", request);
+  log::info!("on_add: deliver = {:?} basic_properties = {:?} request = {:?}", deliver, basic_properties, request);
   // implement logic
   let response = AddResponse { value: request.a + request.b };
   // return response
@@ -20,7 +20,7 @@ async fn on_add(deliver: amqprs::Deliver, basic_properties: amqprs::BasicPropert
 
 async fn on_subtract(deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
   let request: SubtractRequest = structs::bytes_to_struct(&request);
-  log::info!("on_subtract: request = {:?}", request);
+  log::info!("on_subtract: deliver = {:?} basic_properties = {:?} request = {:?}", deliver, basic_properties, request);
   // implement logic
   let response = SubtractResponse { value: request.a - request.b };
   // return response
