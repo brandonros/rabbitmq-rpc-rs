@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     reply_queue_name,
     reply_consumer_tag,
   );
-  let (connection, channel) = reply_consumer.connect().await.unwrap();
+  let (_connection, channel) = reply_consumer.connect().await.unwrap();
   // start consuming replies
   reply_consumer.start_consuming(&channel).await.unwrap();
   // make request
