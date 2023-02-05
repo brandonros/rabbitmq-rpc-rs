@@ -30,16 +30,28 @@ async fn main() -> Result<()> {
   let (_connection, channel) = reply_consumer.connect().await.unwrap();
   // start consuming replies
   reply_consumer.start_consuming(&channel).await.unwrap();
-  // make request
-  let request = AddRequest { a: 1, b: 1 };
-  log::info!("making request {:?}", request);
-  let request_bytes = struct_to_bytes(&request);
-  let timeout_ms = 2000;
-  let message_type = "add";
-  let response_bytes = reply_consumer.request(&channel, message_type, request_bytes, timeout_ms).await?;
-  let response: AddResponse = bytes_to_struct(response_bytes);
-  // print response
-  log::info!("got response {:?}", response);
+  // make add request
+  {
+    let request = AddRequest { a: 1, b: 1 };
+    log::info!("making request {:?}", request);
+    let request_bytes = structs::struct_to_bytes(&request);
+    let timeout_ms = 2000;
+    let message_type = "add";
+    let response_bytes = reply_consumer.request(&channel, message_type, request_bytes, timeout_ms).await?;
+    let response: AddResponse = structs::bytes_to_struct(response_bytes);
+    log::info!("got response {:?}", response);
+  }
+  // make subtract request
+  {
+    let request = SubtractRequest { a: 1, b: 1 };
+    log::info!("making request {:?}", request);
+    let request_bytes = structs::struct_to_bytes(&request);
+    let timeout_ms = 2000;
+    let message_type = "subtract";
+    let response_bytes = reply_consumer.request(&channel, message_type, request_bytes, timeout_ms).await?;
+    let response: SubtractResponse = structs::bytes_to_struct(response_bytes);
+    log::info!("got response {:?}", response);
+  }
   // exit
   Ok(())
 }

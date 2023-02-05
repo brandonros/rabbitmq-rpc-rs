@@ -9,12 +9,22 @@ use rabbitmq_rpc::rabbitmq_replier;
 use structs::*;
 
 async fn on_add(request: Vec<u8>) -> Result<Vec<u8>> {
-  let request: AddRequest = bytes_to_struct(request);
+  let request: AddRequest = structs::bytes_to_struct(request);
   log::info!("on_add: request = {:?}", request);
   // implement logic
   let response = AddResponse { value: request.a + request.b };
   // return response
-  let response_bytes = struct_to_bytes(&response);
+  let response_bytes = structs::struct_to_bytes(&response);
+  Ok(response_bytes)
+}
+
+async fn on_subtract(request: Vec<u8>) -> Result<Vec<u8>> {
+  let request: SubtractRequest = structs::bytes_to_struct(request);
+  log::info!("on_subtract: request = {:?}", request);
+  // implement logic
+  let response = SubtractResponse { value: request.a - request.b };
+  // return response
+  let response_bytes = structs::struct_to_bytes(&response);
   Ok(response_bytes)
 }
 
@@ -35,6 +45,10 @@ async fn main() -> Result<()> {
   request_handlers.insert(
     String::from("add"),
     Arc::new(move |a| Box::pin(on_add(a)) as BoxFuture<'static, Result<Vec<u8>>>),
+  );
+  request_handlers.insert(
+    String::from("subtract"),
+    Arc::new(move |a| Box::pin(on_subtract(a)) as BoxFuture<'static, Result<Vec<u8>>>),
   );
   let request_consumer = rabbitmq_replier::QueueRequestConsumer::new(
     host.to_string(),

@@ -11,6 +11,17 @@ pub struct AddResponse {
   pub value: u32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SubtractRequest {
+  pub a: u32,
+  pub b: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SubtractResponse {
+  pub value: u32,
+}
+
 pub fn struct_to_bytes<T: serde::Serialize>(input: &T) -> Vec<u8> {
   return bincode::serialize(&input).unwrap();
 }
