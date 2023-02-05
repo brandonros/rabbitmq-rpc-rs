@@ -19,9 +19,17 @@ tracing-subscriber = "0.3.16"
 log = "0.4.17"
 
 [[example]]
-name = "client"
-path = "src/client.rs"
+name = "rpc_client"
+path = "src/rpc_client.rs"
 
 [[example]]
-name = "server"
-path = "src/server.rs"
+name = "rpc_server"
+path = "src/rpc_server.rs"
+
+[[example]]
+name = "pubsub_publisher"
+path = "src/pubsub_publisher.rs"
+
+[[example]]
+name = "pubsub_subscriber"
+path = "src/pubsub_subscriber.rs"
