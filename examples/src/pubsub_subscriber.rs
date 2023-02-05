@@ -7,9 +7,9 @@ use futures::future::BoxFuture;
 use rabbitmq_rpc::subscriber;
 use structs::*;
 
-async fn on_info(request: Arc<Vec<u8>>) -> Result<()> {
+async fn on_info(deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, request: Arc<Vec<u8>>) -> Result<()> {
   let request: InfoMessage = structs::bytes_to_struct(&request);
-  log::info!("on_info: request = {:?}", request);
+  log::info!("on_info: deliver = {:?} basic_properties = {:?} request = {:?}", deliver, basic_properties, request);
   Ok(())
 }
 
@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
   let queue_name = String::from("q.pubsub");
   let subscriber_consumer_tag = String::from("subscriber_consumer_tag");
   let mut message_handlers: HashMap<String, subscriber::OnMessageCallback> = HashMap::new();
-  message_handlers.insert(String::from("info"), Arc::new(move |a| Box::pin(on_info(a)) as BoxFuture<'static, Result<()>>));
+  message_handlers.insert(String::from("info"), Arc::new(move |deliver, basic_properties, request| Box::pin(on_info(deliver, basic_properties, request)) as BoxFuture<'static, Result<()>>));
   let subscriber = subscriber::QueueSubscriber::new(
     host.to_string(),
     port,

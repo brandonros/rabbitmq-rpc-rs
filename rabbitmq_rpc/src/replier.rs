@@ -5,7 +5,9 @@ use amqprs::{channel::Channel, connection::Connection};
 use anyhow::Result;
 use async_trait::async_trait;
 
-pub type OnRequestCallback = Arc<dyn Fn(Arc<Vec<u8>>) -> BoxFuture<'static, Result<Vec<u8>>> + Send + Sync>;
+pub type OnRequestCallback = Arc<dyn Fn(amqprs::Deliver, amqprs::BasicProperties, Arc<Vec<u8>>) -> BoxFuture<'static, Result<Vec<u8>>> + Send + Sync>;
+
+pub type RequestHandlersMap = HashMap<String, OnRequestCallback>;
 
 pub struct QueueRequestConsumer {
   pub host: String,
@@ -16,14 +18,14 @@ pub struct QueueRequestConsumer {
   pub request_queue_name: String,
   pub reply_queue_name: String,
   pub request_consumer_tag: String,
-  pub request_handlers: HashMap<String, OnRequestCallback>,
+  pub request_handlers: RequestHandlersMap,
 }
 
 struct MyAsyncRequestConsumer {
   pub exchange_name: String,
   pub request_queue_name: String,
   pub reply_queue_name: String,
-  pub request_handlers: HashMap<String, OnRequestCallback>,
+  pub request_handlers: RequestHandlersMap,
 }
 
 #[async_trait]
@@ -40,10 +42,11 @@ impl amqprs::consumer::AsyncConsumer for MyAsyncRequestConsumer {
     }
     // calculate reply
     // TODO: does arc::new() prevent content.clone() here?
+    // TODO: do not clone basic properties here?
     let message_type = basic_properties.message_type().unwrap();
     let message_type_handler = self.request_handlers.get(message_type).unwrap();
     let content = Arc::new(content);
-    let response_content_bytes = (message_type_handler)(content).await.unwrap();
+    let response_content_bytes = (message_type_handler)(deliver, basic_properties.clone(), content).await.unwrap();
     // write reply
     let correlation_id = basic_properties.correlation_id().unwrap();
     let args = amqprs::channel::BasicPublishArguments::default()
@@ -71,7 +74,7 @@ impl QueueRequestConsumer {
     request_queue_name: String,
     reply_queue_name: String,
     request_consumer_tag: String,
-    request_handlers: HashMap<String, OnRequestCallback>,
+    request_handlers: RequestHandlersMap,
   ) -> QueueRequestConsumer {
     return QueueRequestConsumer {
       host,

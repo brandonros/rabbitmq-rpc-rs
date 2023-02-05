@@ -5,7 +5,7 @@ use amqprs::{channel::Channel, connection::Connection};
 use anyhow::Result;
 use async_trait::async_trait;
 
-pub type OnMessageCallback = Arc<dyn Fn(Arc<Vec<u8>>) -> BoxFuture<'static, Result<()>> + Send + Sync>;
+pub type OnMessageCallback = Arc<dyn Fn(amqprs::Deliver, amqprs::BasicProperties, Arc<Vec<u8>>) -> BoxFuture<'static, Result<()>> + Send + Sync>;
 
 pub type MessageHandlersMap = HashMap<String, OnMessageCallback>;
 
@@ -28,7 +28,7 @@ struct MyAsyncQueueSubscriber {
 
 #[async_trait]
 impl amqprs::consumer::AsyncConsumer for MyAsyncQueueSubscriber {
-  async fn consume(&mut self, channel: &amqprs::channel::Channel, deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, content: Vec<u8>) {
+  async fn consume(&mut self, _channel: &amqprs::channel::Channel, deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, content: Vec<u8>) {
     //println!("request\n\tdeliver {:?} basic_properties {:?} content {:?}", deliver, basic_properties, content);
     let exchange_name = deliver.exchange();
     if *exchange_name != self.exchange_name {
@@ -43,7 +43,7 @@ impl amqprs::consumer::AsyncConsumer for MyAsyncQueueSubscriber {
     let message_type = basic_properties.message_type().unwrap();
     let message_type_handler = self.message_handlers.get(message_type).unwrap();
     let content = Arc::new(content);
-    (message_type_handler)(content).await.unwrap();
+    (message_type_handler)(deliver, basic_properties, content).await.unwrap();
   }
 }
 

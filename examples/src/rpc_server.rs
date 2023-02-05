@@ -8,7 +8,7 @@ use futures::future::BoxFuture;
 use rabbitmq_rpc::replier;
 use structs::*;
 
-async fn on_add(request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
+async fn on_add(deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
   let request: AddRequest = structs::bytes_to_struct(&request);
   log::info!("on_add: request = {:?}", request);
   // implement logic
@@ -18,7 +18,7 @@ async fn on_add(request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
   Ok(response_bytes)
 }
 
-async fn on_subtract(request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
+async fn on_subtract(deliver: amqprs::Deliver, basic_properties: amqprs::BasicProperties, request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
   let request: SubtractRequest = structs::bytes_to_struct(&request);
   log::info!("on_subtract: request = {:?}", request);
   // implement logic
@@ -44,11 +44,11 @@ async fn main() -> Result<()> {
   let mut request_handlers: HashMap<String, replier::OnRequestCallback> = HashMap::new();
   request_handlers.insert(
     String::from("add"),
-    Arc::new(move |a| Box::pin(on_add(a)) as BoxFuture<'static, Result<Vec<u8>>>),
+    Arc::new(move |deliver, basic_properties, request| Box::pin(on_add(deliver, basic_properties, request)) as BoxFuture<'static, Result<Vec<u8>>>),
   );
   request_handlers.insert(
     String::from("subtract"),
-    Arc::new(move |a| Box::pin(on_subtract(a)) as BoxFuture<'static, Result<Vec<u8>>>),
+    Arc::new(move |deliver, basic_properties, request| Box::pin(on_subtract(deliver, basic_properties, request)) as BoxFuture<'static, Result<Vec<u8>>>),
   );
   let request_consumer = replier::QueueRequestConsumer::new(
     host.to_string(),
