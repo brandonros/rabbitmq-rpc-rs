@@ -1,2 +1,2 @@
-pub mod rabbitmq_replier;
-pub mod rabbitmq_requester;
+pub mod replier;
+pub mod requester;

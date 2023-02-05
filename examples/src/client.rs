@@ -1,7 +1,7 @@
 mod structs;
 
 use anyhow::Result;
-use rabbitmq_rpc::rabbitmq_requester;
+use rabbitmq_rpc::requester;
 use structs::*;
 
 #[tokio::main(flavor = "current_thread")]
@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
   let request_queue_name = String::from("q.req");
   let reply_queue_name = String::from("q.reply");
   let reply_consumer_tag = String::from("reply_consumer");
-  let reply_consumer = rabbitmq_requester::QueueReplyConsumer::new(
+  let reply_consumer = requester::QueueReplyConsumer::new(
     host.to_string(),
     port,
     username.to_string(),

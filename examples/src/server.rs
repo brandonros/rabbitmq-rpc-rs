@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use futures::future::BoxFuture;
-use rabbitmq_rpc::rabbitmq_replier;
+use rabbitmq_rpc::replier;
 use structs::*;
 
 async fn on_add(request: Vec<u8>) -> Result<Vec<u8>> {
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
   let request_queue_name = String::from("q.req");
   let reply_queue_name = String::from("q.reply");
   let request_consumer_tag = String::from("request_consumer_tag");
-  let mut request_handlers: HashMap<String, rabbitmq_replier::OnRequestCallback> = HashMap::new();
+  let mut request_handlers: HashMap<String, replier::OnRequestCallback> = HashMap::new();
   request_handlers.insert(
     String::from("add"),
     Arc::new(move |a| Box::pin(on_add(a)) as BoxFuture<'static, Result<Vec<u8>>>),
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     String::from("subtract"),
     Arc::new(move |a| Box::pin(on_subtract(a)) as BoxFuture<'static, Result<Vec<u8>>>),
   );
-  let request_consumer = rabbitmq_replier::QueueRequestConsumer::new(
+  let request_consumer = replier::QueueRequestConsumer::new(
     host.to_string(),
     port,
     username.to_string(),
