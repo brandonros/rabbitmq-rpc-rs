@@ -8,8 +8,8 @@ use futures::future::BoxFuture;
 use rabbitmq_rpc::replier;
 use structs::*;
 
-async fn on_add(request: Vec<u8>) -> Result<Vec<u8>> {
-  let request: AddRequest = structs::bytes_to_struct(request);
+async fn on_add(request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
+  let request: AddRequest = structs::bytes_to_struct(&request);
   log::info!("on_add: request = {:?}", request);
   // implement logic
   let response = AddResponse { value: request.a + request.b };
@@ -18,8 +18,8 @@ async fn on_add(request: Vec<u8>) -> Result<Vec<u8>> {
   Ok(response_bytes)
 }
 
-async fn on_subtract(request: Vec<u8>) -> Result<Vec<u8>> {
-  let request: SubtractRequest = structs::bytes_to_struct(request);
+async fn on_subtract(request: Arc<Vec<u8>>) -> Result<Vec<u8>> {
+  let request: SubtractRequest = structs::bytes_to_struct(&request);
   log::info!("on_subtract: request = {:?}", request);
   // implement logic
   let response = SubtractResponse { value: request.a - request.b };

@@ -7,8 +7,8 @@ use futures::future::BoxFuture;
 use rabbitmq_rpc::subscriber;
 use structs::*;
 
-async fn on_info(request: Vec<u8>) -> Result<()> {
-  let request: InfoMessage = structs::bytes_to_struct(request);
+async fn on_info(request: Arc<Vec<u8>>) -> Result<()> {
+  let request: InfoMessage = structs::bytes_to_struct(&request);
   log::info!("on_info: request = {:?}", request);
   Ok(())
 }

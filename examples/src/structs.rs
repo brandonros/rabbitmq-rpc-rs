@@ -31,6 +31,6 @@ pub fn struct_to_bytes<T: serde::Serialize>(input: &T) -> Vec<u8> {
   return bincode::serialize(&input).unwrap();
 }
 
-pub fn bytes_to_struct<T: for<'de> serde::Deserialize<'de>>(input: Vec<u8>) -> T {
+pub fn bytes_to_struct<T: for<'de> serde::Deserialize<'de>>(input: &Vec<u8>) -> T {
   return bincode::deserialize(&input[..]).unwrap();
 }

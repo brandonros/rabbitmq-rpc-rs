@@ -5,7 +5,7 @@ use amqprs::{channel::Channel, connection::Connection};
 use anyhow::Result;
 use async_trait::async_trait;
 
-pub type OnRequestCallback = Arc<dyn Fn(Vec<u8>) -> BoxFuture<'static, Result<Vec<u8>>> + Send + Sync>;
+pub type OnRequestCallback = Arc<dyn Fn(Arc<Vec<u8>>) -> BoxFuture<'static, Result<Vec<u8>>> + Send + Sync>;
 
 pub struct QueueRequestConsumer {
   pub host: String,
@@ -39,10 +39,11 @@ impl amqprs::consumer::AsyncConsumer for MyAsyncRequestConsumer {
       panic!("received message for unknown queue");
     }
     // calculate reply
-    // TODO: figure out how to not need clone here
+    // TODO: does arc::new() prevent content.clone() here?
     let message_type = basic_properties.message_type().unwrap();
     let message_type_handler = self.request_handlers.get(message_type).unwrap();
-    let response_content_bytes = (message_type_handler)(content.clone()).await.unwrap();
+    let content = Arc::new(content);
+    let response_content_bytes = (message_type_handler)(content).await.unwrap();
     // write reply
     let correlation_id = basic_properties.correlation_id().unwrap();
     let args = amqprs::channel::BasicPublishArguments::default()

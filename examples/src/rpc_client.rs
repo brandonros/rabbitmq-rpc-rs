@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
     let timeout_ms = 2000;
     let message_type = "add";
     let response_bytes = reply_consumer.request(&channel, message_type, request_bytes, timeout_ms).await?;
-    let response: AddResponse = structs::bytes_to_struct(response_bytes);
+    let response: AddResponse = structs::bytes_to_struct(&response_bytes);
     log::info!("got response {:?}", response);
   }
   // make subtract request
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let timeout_ms = 2000;
     let message_type = "subtract";
     let response_bytes = reply_consumer.request(&channel, message_type, request_bytes, timeout_ms).await?;
-    let response: SubtractResponse = structs::bytes_to_struct(response_bytes);
+    let response: SubtractResponse = structs::bytes_to_struct(&response_bytes);
     log::info!("got response {:?}", response);
   }
   // exit

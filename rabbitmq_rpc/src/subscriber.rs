@@ -5,7 +5,9 @@ use amqprs::{channel::Channel, connection::Connection};
 use anyhow::Result;
 use async_trait::async_trait;
 
-pub type OnMessageCallback = Arc<dyn Fn(Vec<u8>) -> BoxFuture<'static, Result<()>> + Send + Sync>;
+pub type OnMessageCallback = Arc<dyn Fn(Arc<Vec<u8>>) -> BoxFuture<'static, Result<()>> + Send + Sync>;
+
+pub type MessageHandlersMap = HashMap<String, OnMessageCallback>;
 
 pub struct QueueSubscriber {
   pub host: String,
@@ -15,13 +17,13 @@ pub struct QueueSubscriber {
   pub exchange_name: String,
   pub queue_name: String,
   pub subscriber_consumer_tag: String,
-  pub message_handlers: HashMap<String, OnMessageCallback>,
+  pub message_handlers: MessageHandlersMap,
 }
 
 struct MyAsyncQueueSubscriber {
   pub exchange_name: String,
   pub queue_name: String,
-  pub message_handlers: HashMap<String, OnMessageCallback>,
+  pub message_handlers: MessageHandlersMap,
 }
 
 #[async_trait]
@@ -37,10 +39,11 @@ impl amqprs::consumer::AsyncConsumer for MyAsyncQueueSubscriber {
       panic!("received message for unknown queue");
     }
     // fire handler
-    // TODO: figure out how to not need clone here
+    // TODO: does arc::new() prevent content.clone() here?
     let message_type = basic_properties.message_type().unwrap();
     let message_type_handler = self.message_handlers.get(message_type).unwrap();
-    (message_type_handler)(content.clone()).await.unwrap();
+    let content = Arc::new(content);
+    (message_type_handler)(content).await.unwrap();
   }
 }
 

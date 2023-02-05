@@ -1,9 +1,6 @@
 mod structs;
 
-use std::{collections::HashMap, sync::Arc};
-
 use anyhow::Result;
-use futures::future::BoxFuture;
 use rabbitmq_rpc::publisher;
 use structs::*;
 
